@@ -66,7 +66,7 @@ def polytabloid(T):
     for pi in C_T:
         T_1 = act(pi,T)
         sum_contains_equiv = False
-        for T_2 in e_T.keys():
+        for T_2 in e_T:
             if row_equiv(T_1,T_2):
                 sum_contains_equiv = True
                 e_T[T_2] += sgn(pi)
