@@ -95,14 +95,21 @@ def canonical_tableau(la):
 def gram_matrix(la):
     return [[bilinear_form(polytabloid(T_1),polytabloid(T_2)) for T_1 in StandardTableaux(la)] for T_2 in StandardTableaux(la)]
 
-#compute the rank of the Gram matrix in characteristic 0
-import numpy as np
-la = Partitions(5)[4]
-A=gram_matrix(la)
-np.linalg.matrix_rank(A)
+#compute the rank of a matrix modulo p when given as a list
+def rank(A,p):
+    return matrix(GF(p),len(A),A).rank()
 
-#A modulo 3
-np.mod(A,3)
+n=6 #size of symmetric group
+P=Primes()[:5]; P #primes p until all all partitions are p-regular
 
-#compue the rank of the Gram matrix modulo 3
-np.linalg.matrix_rank(np.mod(A,3),3)
+#compute a table of ranks of Gram matrices for p-regular partitions la
+header_row=[["p//partition"]+[la for la in Partitions(n)]]; header_row
+data=[[str(p)]+[rank(gram_matrix(la),p) if la.is_regular(p) else None for la in Partitions(n)] for p in P]
+
+#print the table
+import pandas as pd
+df=pd.DataFrame(data,columns=header_row)
+print(df.to_string(index=False))
+
+#save the data to a .csv
+df.to_csv("rank_gram_matrices_n=6.csv",index=False)
