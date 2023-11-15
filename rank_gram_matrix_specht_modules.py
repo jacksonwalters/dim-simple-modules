@@ -1,3 +1,11 @@
+#compute dim D^{\lambda}
+#define action of S_n on Young tableaux - DONE
+#for a p-regular partition \lambda
+#find basis elements e_i for Specht modules S^\lambda
+#write basis e_T in terms of Young tableaux as in Chan's notes
+#compute rank of Gram matrix (<e_i,e_j>)_{i,j=1,...,n} as in Chan's notes
+#REF: Chan's notes - https://math.mit.edu/~charchan/ModularRepresentationsSymmetricGroupSeminar.pdf
+
 #define action of S_n on Young tableaux T
 def act(sigma,T):
     return Tableau([[sigma(l[i]) for i in range(len(l))] for l in T])
@@ -11,11 +19,7 @@ def act_rows(g,T):
 #determine when two tableaux are row-equivalent
 def row_equiv(T_0,T_1):
     assert T_0.shape() == T_1.shape()
-    row_group = cartesian_product([SymmetricGroup(size) for size in T_0.shape()])
-    for g in row_group:
-        if act_rows(g,T_0) == T_1:
-            return True
-    return False
+    return all(set(T_0[i])==set(T_1[i]) for i in range(len(T_0)))
 
 #get columns of tableau
 #there is a MUCH smarter way to do this
@@ -76,23 +80,25 @@ def polytabloid(T):
 #iterates through both keys only increasing the sum by the product of entries when {s}=={t}, i.e. s ~ t
 def bilinear_form(poly_1,poly_2):
     sum = 0
-    for s in poly_1.keys():
-        for t in poly_2.keys():
+    for s in poly_1:
+        for t in poly_2:
             if row_equiv(s,t):
                 sum += poly_1[s]*poly_2[t]
     return sum
 
+#create a standard "canonical" tableau by placing entries sequentially from left-to-right, top-to-bottom
+def canonical_tableau(la):
+    return Tableau([[sum(la[k] for k in range(j))+i+1 for i in range(la[j])] for j in range(len(la))])
+
 #use the bilinear form to compute the rank of the Gram matrix (<e_i,e_j>)_{i,j=1,...,n}
 #note that polytabloids e_T form a basis for S^\lambda for *standard* tableau T
-T = Tableau([[1,2,3],[4,5]])
-def gram_matrix(T):
-    std_tableaux=[act(g,T) for g in SymmetricGroup(sum(T.shape())) if act(g,T).is_standard()]
-    gram_matrix=[[bilinear_form(polytabloid(T_1),polytabloid(T_2)) for T_1 in std_tableaux] for T_2 in std_tableaux]
-    return gram_matrix
+def gram_matrix(la):
+    return [[bilinear_form(polytabloid(T_1),polytabloid(T_2)) for T_1 in StandardTableaux(la)] for T_2 in StandardTableaux(la)]
 
 #compute the rank of the Gram matrix in characteristic 0
 import numpy as np
-A=gram_matrix(T)
+la = Partitions(5)[4]
+A=gram_matrix(la)
 np.linalg.matrix_rank(A)
 
 #A modulo 3
