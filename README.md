@@ -1,4 +1,4 @@
-# mod_repn_symmetric_group
+# dim-simple-modules
 
 Computations for the modular representation theory of the symmetric group.
 
